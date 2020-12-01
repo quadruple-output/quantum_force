@@ -1,0 +1,10 @@
+[package]
+name = "quantum_force"
+version = "0.1.0"
+authors = ["quadruple-output <57874618+quadruple-output@users.noreply.github.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = "*" # latest was 0.3 when Project was started

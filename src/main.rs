@@ -1,22 +1,22 @@
+#![feature(bool_to_option)]
+
 mod components;
-mod entities;
+mod plugins;
 mod systems;
 
 use bevy::prelude::*;
 
-use components::Position;
-use entities::Sphere;
-
-fn add_default_positions(mut commands: Commands) {
+fn add_default_entities(mut commands: Commands) {
+    use components::{BasicShape, Position};
     commands
-        .spawn(Sphere::bundle(Position::origin()))
-        .spawn((Sphere, Position::origin()))
-        .spawn((Sphere, Position::at(1.0, 2.0, 3.0)));
+        .spawn((BasicShape::sphere(5.0), Position::origin()))
+        .spawn((BasicShape::sphere(2.0), Position::at(1.0, 2.0, 3.0)));
 }
 
 fn main() {
     App::build()
-        .add_startup_system(add_default_positions.system())
-        .add_system(systems::show_positions.system())
+        .add_plugins(DefaultPlugins)
+        .add_plugin(plugins::Debug)
+        .add_startup_system(add_default_entities.system())
         .run();
 }

@@ -12,7 +12,7 @@ pub fn spin(time: Res<Time>, mut query: Query<(&Spin, &mut Transform)>) {
                 transform.rotate(Quat::from_rotation_y(time.delta_seconds as f32 * 4.0 * PI))
             }
             Spin::Down => {
-                transform.rotate(Quat::from_rotation_z(time.delta_seconds as f32 * 4.0 * -PI))
+                transform.rotate(Quat::from_rotation_y(time.delta_seconds as f32 * 4.0 * -PI))
             }
         })
 }

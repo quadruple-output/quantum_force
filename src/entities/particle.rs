@@ -1,24 +1,23 @@
 use crate::components::{Force, Mass, Spin, Velocity};
 use bevy::prelude::*;
 
-#[derive(Default)]
 pub struct ParticleAssets {
     quant: QuantAssets,
-    sphere: AssetHandles,
+    sphere: MeshMat,
+    fake_shadow: MeshMat,
 }
 
-#[derive(Default)]
-struct AssetHandles {
+struct MeshMat {
     mesh: Handle<Mesh>,
     material: Handle<StandardMaterial>,
 }
 
-#[derive(Default)]
 struct QuantAssets {
     mesh: Handle<Mesh>,
     material_weight: Handle<StandardMaterial>,
     material_inertia: Handle<StandardMaterial>,
 }
+pub struct LeadingParticle(Entity);
 
 #[derive(Copy, Clone)]
 pub struct Particle {
@@ -27,40 +26,70 @@ pub struct Particle {
     velocity: Vec3,
 }
 
-pub struct ParticlePlugin;
+impl FromResources for ParticleAssets {
+    fn from_resources(resources: &Resources) -> Self {
+        let mut meshes = resources.get_mut::<Assets<Mesh>>().unwrap();
+        let mut materials = resources.get_mut::<Assets<StandardMaterial>>().unwrap();
 
-impl Plugin for ParticlePlugin {
-    fn build(&self, app: &mut AppBuilder) {
-        app.add_resource(ParticleAssets::default())
-            .add_startup_system(Particle::startup_system.system());
+        Self {
+            quant: QuantAssets {
+                mesh: meshes.add(Mesh::from(shape::Icosphere {
+                    radius: 1.0, // scaled by consumer
+                    subdivisions: 1,
+                })),
+                material_weight: materials.add(Color::RED.into()),
+                material_inertia: materials.add(Color::PINK.into()),
+            },
+            sphere: MeshMat {
+                mesh: meshes.add(Mesh::from(shape::Icosphere {
+                    radius: 1.0, // scaled by consumer
+                    subdivisions: 4,
+                })),
+                material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.3).into()),
+            },
+            fake_shadow: MeshMat {
+                mesh: meshes.add(Mesh::from(shape::Icosphere {
+                    radius: 1.0, // scaled by consumer
+                    subdivisions: 2,
+                })),
+                material: materials.add(Color::rgba(0.3, 0.5, 0.3, 1.0).into()),
+            },
+        }
     }
 }
 
 impl Particle {
-    fn startup_system(
-        mut meshes: ResMut<Assets<Mesh>>,
-        mut materials: ResMut<Assets<StandardMaterial>>,
-        mut my_assets: ResMut<ParticleAssets>,
-    ) {
-        my_assets.quant.mesh = meshes.add(Mesh::from(shape::Icosphere {
-            radius: 1.0, // scaled by consumer
-            subdivisions: 1,
-        }));
-        my_assets.quant.material_weight = materials.add(Color::rgb(1.0, 0.0, 0.0).into());
-        my_assets.quant.material_inertia = materials.add(Color::rgb(1.0, 1.0, 0.0).into());
-        my_assets.sphere.mesh = meshes.add(Mesh::from(shape::Icosphere {
-            radius: 1.0, // scaled by consumer
-            subdivisions: 4,
-        }));
-        my_assets.sphere.material = materials.add(Color::rgba(0.0, 0.0, 1.0, 0.3).into());
-    }
-
     pub fn new() -> Self {
         Self {
             spin: Spin::Up,
             mass: None,
             velocity: Vec3::default(),
         }
+    }
+
+    #[allow(clippy::type_complexity)]
+    pub fn animate(
+        mut qs: QuerySet<(
+            Query<&LeadingParticle>,
+            Query<&Transform>,
+            Query<(&LeadingParticle, &mut Transform)>,
+        )>,
+    ) {
+        let map_particle_translations = qs
+            .q0()
+            .iter()
+            .map(|leading_particle| {
+                let particle_translation = qs.q1().get(leading_particle.0).unwrap().translation;
+                (leading_particle.0, particle_translation)
+            })
+            .collect::<std::collections::BTreeMap<_, _>>();
+        qs.q2_mut()
+            .iter_mut()
+            .for_each(|(leading_particle, mut shadow_transform)| {
+                let &particle_translation =
+                    map_particle_translations.get(&leading_particle.0).unwrap();
+                *shadow_transform = Self::shadow_transform(particle_translation);
+            });
     }
 
     pub fn with_spin(mut self, spin: Spin) -> Self {
@@ -91,14 +120,16 @@ impl Particle {
             })
             .with(Velocity(self.velocity))
             .with(Force::default());
+        let mut quant_scale = 1.0;
         if let Some(mass) = self.mass {
             commands.with(Mass(mass));
+            quant_scale = mass;
         };
         commands.with_children(|children| {
             children
                 // inner quants:
                 .spawn(PbrComponents {
-                    transform: Transform::from_scale(Vec3::one() * 0.05),
+                    transform: Transform::from_scale(Vec3::one() * 0.05 * quant_scale),
                     ..Default::default()
                 })
                 .with(self.spin)
@@ -117,26 +148,40 @@ impl Particle {
                             ..Default::default()
                         });
                 });
-            children
-                // semi transparent sphere:
-                .spawn(PbrComponents {
-                    mesh: my_assets.sphere.mesh.clone(),
-                    material: my_assets.sphere.material.clone(),
-                    transform: Transform::from_scale(Vec3::one() * 0.2),
-                    ..Default::default()
-                })
-                .spawn(PbrComponents {
-                    mesh: my_assets.sphere.mesh.clone(),
-                    material: my_assets.sphere.material.clone(),
-                    transform: Transform::from_scale(Vec3::one() * 0.4),
-                    ..Default::default()
-                })
-                .spawn(PbrComponents {
-                    mesh: my_assets.sphere.mesh.clone(),
-                    material: my_assets.sphere.material.clone(),
-                    transform: Transform::from_scale(Vec3::one() * 0.6),
-                    ..Default::default()
-                });
+            // children
+            //     // semi transparent sphere:
+            //     .spawn(PbrComponents {
+            //         mesh: my_assets.sphere.mesh.clone(),
+            //         material: my_assets.sphere.material.clone(),
+            //         transform: Transform::from_scale(Vec3::one() * 0.2),
+            //         ..Default::default()
+            //     })
+            //     .spawn(PbrComponents {
+            //         mesh: my_assets.sphere.mesh.clone(),
+            //         material: my_assets.sphere.material.clone(),
+            //         transform: Transform::from_scale(Vec3::one() * 0.4),
+            //         ..Default::default()
+            //     })
+            //     .spawn(PbrComponents {
+            //         mesh: my_assets.sphere.mesh.clone(),
+            //         material: my_assets.sphere.material.clone(),
+            //         transform: Transform::from_scale(Vec3::one() * 0.6),
+            //         ..Default::default()
+            //     });
         });
+        let particle = commands.current_entity().unwrap();
+        commands
+            .spawn(PbrComponents {
+                mesh: my_assets.fake_shadow.mesh.clone(),
+                material: my_assets.fake_shadow.material.clone(),
+                transform: Self::shadow_transform(position),
+                ..Default::default()
+            })
+            .with(LeadingParticle(particle));
+    }
+
+    fn shadow_transform(particle_translation: Vec3) -> Transform {
+        let xz_position = Vec3::new(particle_translation.x(), 0.01, particle_translation.z());
+        Transform::from_translation(xz_position) * Transform::from_scale(Vec3::new(0.2, 0.0, 0.2))
     }
 }

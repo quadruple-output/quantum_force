@@ -114,7 +114,7 @@ impl Particle {
         my_assets: &Res<ParticleAssets>,
     ) {
         commands
-            .spawn(PbrComponents {
+            .spawn(PbrBundle {
                 transform: Transform::from_translation(position),
                 ..Default::default()
             })
@@ -128,20 +128,20 @@ impl Particle {
         commands.with_children(|children| {
             children
                 // inner quants:
-                .spawn(PbrComponents {
+                .spawn(PbrBundle {
                     transform: Transform::from_scale(Vec3::one() * 0.05 * quant_scale),
                     ..Default::default()
                 })
                 .with(self.spin)
                 .with_children(|inner_quants| {
                     inner_quants
-                        .spawn(PbrComponents {
+                        .spawn(PbrBundle {
                             mesh: my_assets.quant.mesh.clone(),
                             material: my_assets.quant.material_weight.clone(),
                             transform: Transform::from_translation(Vec3::unit_x() * 2.0),
                             ..Default::default()
                         })
-                        .spawn(PbrComponents {
+                        .spawn(PbrBundle {
                             mesh: my_assets.quant.mesh.clone(),
                             material: my_assets.quant.material_inertia.clone(),
                             transform: Transform::from_translation(Vec3::unit_x() * -2.0),
@@ -171,7 +171,7 @@ impl Particle {
         });
         let particle = commands.current_entity().unwrap();
         commands
-            .spawn(PbrComponents {
+            .spawn(PbrBundle {
                 mesh: my_assets.fake_shadow.mesh.clone(),
                 material: my_assets.fake_shadow.material.clone(),
                 transform: Self::shadow_transform(position),
@@ -181,7 +181,7 @@ impl Particle {
     }
 
     fn shadow_transform(particle_translation: Vec3) -> Transform {
-        let xz_position = Vec3::new(particle_translation.x(), 0.01, particle_translation.z());
+        let xz_position = Vec3::new(particle_translation.x, 0.01, particle_translation.z);
         Transform::from_translation(xz_position) * Transform::from_scale(Vec3::new(0.2, 0.0, 0.2))
     }
 }

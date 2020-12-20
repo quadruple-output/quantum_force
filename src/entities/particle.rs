@@ -150,19 +150,19 @@ impl Particle {
                 });
             // children
             //     // semi transparent sphere:
-            //     .spawn(PbrComponents {
+            //     .spawn(PbrBundle {
             //         mesh: my_assets.sphere.mesh.clone(),
             //         material: my_assets.sphere.material.clone(),
             //         transform: Transform::from_scale(Vec3::one() * 0.2),
             //         ..Default::default()
             //     })
-            //     .spawn(PbrComponents {
+            //     .spawn(PbrBundle {
             //         mesh: my_assets.sphere.mesh.clone(),
             //         material: my_assets.sphere.material.clone(),
             //         transform: Transform::from_scale(Vec3::one() * 0.4),
             //         ..Default::default()
             //     })
-            //     .spawn(PbrComponents {
+            //     .spawn(PbrBundle {
             //         mesh: my_assets.sphere.mesh.clone(),
             //         material: my_assets.sphere.material.clone(),
             //         transform: Transform::from_scale(Vec3::one() * 0.6),

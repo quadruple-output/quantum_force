@@ -15,8 +15,11 @@ pub fn calculate_forces(
                         let vec_to_other = other_transform.translation - transform.translation;
                         let distance = vec_to_other.length();
                         let direction = vec_to_other.normalize();
-                        *force +=
-                            Force(direction * (mass.0 * other_mass.0) / (distance * distance));
+                        *force += Force(
+                            direction * (mass.0 * other_mass.0)
+                                / (0.05 + // cheating to keep forces relatively small
+                                 distance * distance),
+                        );
                     }
                 })
         })

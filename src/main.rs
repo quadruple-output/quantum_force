@@ -49,7 +49,7 @@ fn add_default_entities(
         })
         .with(MainCamera)
         .with(Velocity(Vec3::unit_x() * 5.0))
-        .with(Damping::half_live(1.0));
+        .with(Damping::half_live(0.5));
     Particle::new()
         .with_mass(2.0)
         .with_spin(Spin::Up)
@@ -82,11 +82,12 @@ fn main() {
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)
+        .init_resource::<PausePhysics>()
+        .init_resource::<ParticleAssets>() // this should be done by a plugin, I guess
         .add_system(bevy::input::system::exit_on_esc_system.system())
+        .add_system(input::react_on_input.system())
         //.add_plugin(FrameTimeDiagnosticsPlugin::default())
         //.add_plugin(PrintDiagnosticsPlugin::default())
-        .init_resource::<ParticleAssets>()
-        .init_resource::<PausePhysics>()
         .add_startup_system(add_default_entities.system())
         .add_system(spin::spin.system())
         .add_system(Particle::animate.system())

@@ -8,17 +8,18 @@ use crate::{
 
 pub fn adjust_velocity(
     pause: Res<PausePhysics>,
-    commands: &mut Commands,
     ts: Res<FixedTimesteps>,
-    mut query: Query<(Entity, &Damping, &mut Velocity)>,
+    mut query: Query<(&Damping, &mut Velocity)>,
 ) {
+    const UNNOTICEABLE_VELOCITY: f32 = 0.01;
     if !pause.0 {
         let dt = Duration::from_secs_f64(ts.get(PHYSICS_TIMESTEP).unwrap().step());
-        for (entity, &damping, mut v) in query.iter_mut() {
-            *v *= 1.0 - damping * dt;
-            if *v < 0.01 {
+        for (&damping, mut v) in query.iter_mut() {
+            if *v >= UNNOTICEABLE_VELOCITY {
+                assert!(damping >= 0.0); // don't want to accelerate
+                *v *= 1.0 - damping * dt;
+            } else if *v != Velocity::default() {
                 *v = Velocity::default();
-                commands.remove_one::<Damping>(entity);
             }
         }
     }

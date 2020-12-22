@@ -3,7 +3,7 @@ use std::ops::{AddAssign, Mul, MulAssign, SubAssign};
 
 use bevy::prelude::Vec3;
 
-#[derive(Debug, Default, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, PartialOrd)]
 pub struct Velocity(pub Vec3);
 
 impl AddAssign for Velocity {

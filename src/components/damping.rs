@@ -16,3 +16,14 @@ impl Mul<Duration> for Damping {
         self.0 * rhs.as_secs_f32()
     }
 }
+
+impl PartialEq<f32> for Damping {
+    fn eq(&self, other: &f32) -> bool {
+        self.0 == *other
+    }
+}
+impl PartialOrd<f32> for Damping {
+    fn partial_cmp(&self, other: &f32) -> Option<std::cmp::Ordering> {
+        self.0.partial_cmp(other)
+    }
+}

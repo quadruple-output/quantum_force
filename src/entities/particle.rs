@@ -1,4 +1,4 @@
-use crate::components::{Force, Mass, Spin, Velocity};
+use crate::components::{Acceleration, Force, Mass, Spin, Velocity};
 use bevy::prelude::*;
 
 pub struct ParticleAssets {
@@ -75,19 +75,22 @@ impl Particle {
             Query<(&LeadingParticle, &mut Transform)>,
         )>,
     ) {
-        let map_particle_translations = qs
+        // cannot read and change Transforms at the same time.  So we build a map of
+        // the Transforms we need per Entity, and adjust the Entity's position in a
+        // second step:
+        let map_of_particle_positions = qs
             .q0()
             .iter()
             .map(|leading_particle| {
-                let particle_translation = qs.q1().get(leading_particle.0).unwrap().translation;
-                (leading_particle.0, particle_translation)
+                let particle_position = qs.q1().get(leading_particle.0).unwrap().translation;
+                (leading_particle.0, particle_position)
             })
             .collect::<std::collections::BTreeMap<_, _>>();
         qs.q2_mut()
             .iter_mut()
             .for_each(|(leading_particle, mut shadow_transform)| {
                 let &particle_translation =
-                    map_particle_translations.get(&leading_particle.0).unwrap();
+                    map_of_particle_positions.get(&leading_particle.0).unwrap();
                 *shadow_transform = Self::shadow_transform(particle_translation);
             });
     }
@@ -118,8 +121,9 @@ impl Particle {
                 transform: Transform::from_translation(position),
                 ..Default::default()
             })
-            .with(Velocity(self.velocity))
-            .with(Force::default());
+            .with(Force::default())
+            .with(Acceleration::default())
+            .with(Velocity(self.velocity));
         let mut quant_scale = 1.0;
         if let Some(mass) = self.mass {
             commands.with(Mass(mass));

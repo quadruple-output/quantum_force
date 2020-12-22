@@ -1,23 +1,27 @@
 use crate::{
-    components::{Force, Mass, Velocity},
-    PHYSICS_TIMESTEP,
+    components::{Acceleration, Force, Mass},
+    PausePhysics,
 };
-use bevy::utils::Duration;
-use bevy::{core::FixedTimesteps, prelude::*};
+use bevy::prelude::*;
 
-pub fn reset(mut forces: Query<&mut Force>) {
-    forces.iter_mut().for_each(|mut f| f.0 = Default::default());
+pub fn reset(
+    time: Res<Time>,
+    mut pause_physics: ResMut<PausePhysics>,
+    mut forces: Query<&mut Force>,
+) {
+    if time.seconds_since_startup() > 3.0 {
+        pause_physics.0 = false;
+        forces.iter_mut().for_each(|mut f| *f = Default::default());
+    }
 }
 
-pub fn apply_to_masses(
-    ts: Res<FixedTimesteps>,
-    mut query: Query<(&Force, &Mass, &mut Velocity, &mut Transform)>,
+pub fn accelerate_masses(
+    pause: Res<PausePhysics>,
+    mut query: Query<(&Force, &Mass, &mut Acceleration)>,
 ) {
-    let dt = Duration::from_secs_f64(ts.get(PHYSICS_TIMESTEP).unwrap().step());
-
-    for (&f, &m, mut v, mut pos) in query.iter_mut() {
-        let a = f / m;
-        *v += a * dt;
-        pos.translation += *v * dt;
+    if !pause.0 {
+        for (&f, &m, mut a) in query.iter_mut() {
+            *a = f / m;
+        }
     }
 }

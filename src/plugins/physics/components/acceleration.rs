@@ -1,8 +1,8 @@
+use crate::common::components::Velocity;
 use bevy::prelude::*;
 use bevy::utils::Duration;
 use std::ops::Mul;
 
-use crate::components::Velocity;
 #[derive(Copy, Clone, Default)]
 pub struct Acceleration(pub Vec3);
 

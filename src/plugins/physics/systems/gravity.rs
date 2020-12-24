@@ -1,7 +1,5 @@
-use crate::{
-    components::{Force, Mass},
-    PausePhysics,
-};
+use super::super::components::{Force, Mass};
+use crate::common::resources::PausePhysics;
 use bevy::prelude::*;
 
 pub fn calculate_forces(

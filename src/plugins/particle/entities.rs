@@ -1,100 +1,34 @@
-use crate::components::{Acceleration, Force, Mass, Spin, Velocity};
+use super::{
+    components::{LeadingParticle, Spin},
+    resources::ParticleAssets,
+    util,
+};
+use crate::{
+    common::components::Velocity,
+    plugins::physics::components::{Acceleration, Force, Mass},
+};
 use bevy::prelude::*;
 
-pub struct ParticleAssets {
-    quant: QuantAssets,
-    sphere: MeshMat,
-    fake_shadow: MeshMat,
-}
-
-struct MeshMat {
-    mesh: Handle<Mesh>,
-    material: Handle<StandardMaterial>,
-}
-
-struct QuantAssets {
-    mesh: Handle<Mesh>,
-    material_weight: Handle<StandardMaterial>,
-    material_inertia: Handle<StandardMaterial>,
-}
-pub struct LeadingParticle(Entity);
-
-#[derive(Copy, Clone)]
-pub struct Particle {
-    spin: Spin,
-    mass: Option<f32>,
-    velocity: Vec3,
-}
-
-impl FromResources for ParticleAssets {
-    fn from_resources(resources: &Resources) -> Self {
-        let mut meshes = resources.get_mut::<Assets<Mesh>>().unwrap();
-        let mut materials = resources.get_mut::<Assets<StandardMaterial>>().unwrap();
-
-        Self {
-            quant: QuantAssets {
-                mesh: meshes.add(Mesh::from(shape::Icosphere {
-                    radius: 1.0, // scaled by consumer
-                    subdivisions: 1,
-                })),
-                material_weight: materials.add(Color::RED.into()),
-                material_inertia: materials.add(Color::PINK.into()),
-            },
-            sphere: MeshMat {
-                mesh: meshes.add(Mesh::from(shape::Icosphere {
-                    radius: 1.0, // scaled by consumer
-                    subdivisions: 4,
-                })),
-                material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.3).into()),
-            },
-            fake_shadow: MeshMat {
-                mesh: meshes.add(Mesh::from(shape::Icosphere {
-                    radius: 1.0, // scaled by consumer
-                    subdivisions: 2,
-                })),
-                material: materials.add(Color::rgba(0.3, 0.5, 0.3, 1.0).into()),
-            },
-        }
-    }
-}
+pub struct Particle;
 
 impl Particle {
-    pub fn new() -> Self {
-        Self {
+    pub fn builder() -> ParticleBuilder {
+        ParticleBuilder {
             spin: Spin::Up,
             mass: None,
             velocity: Vec3::default(),
         }
     }
+}
 
-    #[allow(clippy::type_complexity)]
-    pub fn animate(
-        mut qs: QuerySet<(
-            Query<&LeadingParticle>,
-            Query<&Transform>,
-            Query<(&LeadingParticle, &mut Transform)>,
-        )>,
-    ) {
-        // cannot read and change Transforms at the same time.  So we build a map of
-        // the Transforms we need per Entity, and adjust the Entity's position in a
-        // second step:
-        let map_of_particle_positions = qs
-            .q0()
-            .iter()
-            .map(|leading_particle| {
-                let particle_position = qs.q1().get(leading_particle.0).unwrap().translation;
-                (leading_particle.0, particle_position)
-            })
-            .collect::<std::collections::BTreeMap<_, _>>();
-        qs.q2_mut()
-            .iter_mut()
-            .for_each(|(leading_particle, mut shadow_transform)| {
-                let &particle_translation =
-                    map_of_particle_positions.get(&leading_particle.0).unwrap();
-                *shadow_transform = Self::shadow_transform(particle_translation);
-            });
-    }
+#[derive(Copy, Clone)]
+pub struct ParticleBuilder {
+    spin: Spin,
+    mass: Option<f32>,
+    velocity: Vec3,
+}
 
+impl ParticleBuilder {
     pub fn with_spin(mut self, spin: Spin) -> Self {
         self.spin = spin;
         self
@@ -178,14 +112,9 @@ impl Particle {
             .spawn(PbrBundle {
                 mesh: my_assets.fake_shadow.mesh.clone(),
                 material: my_assets.fake_shadow.material.clone(),
-                transform: Self::shadow_transform(position),
+                transform: util::shadow_transform(position),
                 ..Default::default()
             })
             .with(LeadingParticle(particle));
-    }
-
-    fn shadow_transform(particle_translation: Vec3) -> Transform {
-        let xz_position = Vec3::new(particle_translation.x, 0.01, particle_translation.z);
-        Transform::from_translation(xz_position) * Transform::from_scale(Vec3::new(0.2, 0.0, 0.2))
     }
 }

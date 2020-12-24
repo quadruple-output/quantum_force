@@ -6,6 +6,12 @@ use bevy::prelude::Vec3;
 #[derive(Debug, Default, Copy, Clone, PartialEq, PartialOrd)]
 pub struct Velocity(pub Vec3);
 
+impl Velocity {
+    pub fn new(x: f32, y: f32, z: f32) -> Self {
+        Self(Vec3::new(x, y, z))
+    }
+}
+
 impl AddAssign for Velocity {
     fn add_assign(&mut self, rhs: Self) {
         self.0 += rhs.0;

@@ -1,8 +1,6 @@
-use crate::PHYSICS_TIMESTEP;
-use crate::{components::Velocity, PausePhysics};
-use bevy::core::FixedTimesteps;
-use bevy::prelude::*;
-use bevy::utils::Duration;
+use super::super::PHYSICS_TIMESTEP;
+use crate::common::{components::Velocity, resources::PausePhysics};
+use bevy::{core::FixedTimesteps, prelude::*, utils::Duration};
 
 pub fn adjust_position(
     pause: Res<PausePhysics>,

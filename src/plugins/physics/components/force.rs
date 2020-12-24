@@ -1,4 +1,4 @@
-use crate::components::{Acceleration, Mass};
+use super::{Acceleration, Mass};
 use bevy::prelude::*;
 use std::ops::{AddAssign, Div};
 

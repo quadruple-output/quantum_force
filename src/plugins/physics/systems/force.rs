@@ -1,7 +1,5 @@
-use crate::{
-    components::{Acceleration, Force, Mass},
-    PausePhysics,
-};
+use super::super::components::{Acceleration, Force, Mass};
+use crate::common::resources::PausePhysics;
 use bevy::prelude::*;
 
 pub fn reset(

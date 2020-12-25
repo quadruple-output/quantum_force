@@ -15,9 +15,9 @@ impl bevy::prelude::Plugin for Plugin {
             stage::UPDATE,
             "fixed_step_physics",
             SystemStage::parallel()
-                .with_run_criteria(
+                .with_run_criteria(systems::RunCriteria::from(
                     FixedTimestep::steps_per_second(200.0).with_label(PHYSICS_TIMESTEP),
-                )
+                ))
                 .with_system(force::reset.system())
                 .with_system(gravity::calculate_forces.system())
                 .with_system(force::accelerate_masses.system())

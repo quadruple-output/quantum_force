@@ -1,4 +1,4 @@
-use crate::common::{components::Velocity, events::CameraControl};
+use crate::common::{components::Velocity, events::CameraControl, resources::PausePhysics};
 use bevy::{input::mouse::MouseMotion, prelude::*};
 
 #[derive(Default)]
@@ -22,5 +22,16 @@ pub fn react_on_input(
                 add_velocity: Velocity::new(0.0, -motion.delta.y * MOUSE_SPEED, 0.0),
             });
         }
+    }
+}
+
+pub fn tmp_start_physics(
+    time: Res<Time>,
+    mut pause_physics: ResMut<PausePhysics>,
+    mut started_once: Local<bool>,
+) {
+    if !*started_once && time.seconds_since_startup() > 3.0 {
+        pause_physics.0 = false;
+        *started_once = true;
     }
 }

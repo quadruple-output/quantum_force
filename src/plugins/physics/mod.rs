@@ -6,6 +6,7 @@ use bevy::{core::FixedTimestep, prelude::*};
 
 const PHYSICS_TIMESTEP: &str = "PHYSICS_TIMESTEP";
 
+#[derive(Clone, Copy)]
 pub struct Plugin;
 
 impl bevy::prelude::Plugin for Plugin {

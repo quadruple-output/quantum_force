@@ -19,7 +19,7 @@ pub fn react_on_input(
     for motion in event_readers.mouse_motion.iter(&mouse_motion_events) {
         if keyboard.pressed(KeyCode::LControl) || mouse_buttons.pressed(MouseButton::Right) {
             out_events.send(CameraControl {
-                change_velocity: Velocity::new(0.0, -motion.delta.y * MOUSE_SPEED, 0.0),
+                add_velocity: Velocity::new(0.0, -motion.delta.y * MOUSE_SPEED, 0.0),
             });
         }
     }

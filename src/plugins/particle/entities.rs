@@ -5,7 +5,10 @@ use super::{
 };
 use crate::{
     common::components::Velocity,
-    plugins::physics::components::{Acceleration, Force, Mass},
+    plugins::physics::{
+        self,
+        components::{Acceleration, Force, Mass},
+    },
 };
 use bevy::prelude::*;
 
@@ -57,7 +60,7 @@ impl ParticleBuilder {
             })
             .with(Force::default())
             .with(Acceleration::default())
-            .with(Velocity(self.velocity));
+            .with(Velocity::<physics::Plugin>::from(self.velocity));
         let mut quant_scale = 1.0;
         if let Some(mass) = self.mass {
             commands.with(Mass(mass));

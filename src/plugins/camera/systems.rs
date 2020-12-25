@@ -1,4 +1,7 @@
-use super::components::{Camera, Damping};
+use super::{
+    components::{Camera, Damping},
+    Plugin,
+};
 use crate::common::{components::Velocity, events::CameraControl};
 use bevy::prelude::*;
 
@@ -10,7 +13,7 @@ pub fn spawn_camera(commands: &mut Commands) {
                 .looking_at(Vec3::default(), Vec3::unit_y()),
             ..Default::default()
         })
-        .with(Velocity(Vec3::unit_x() * 5.0))
+        .with(Velocity::<Plugin>::new(5.0, 0.0, 0.0))
         .with(Damping::half_live(0.5));
 }
 
@@ -23,16 +26,16 @@ pub fn aim(mut query: Query<(&Camera, &mut Transform)>) {
 pub fn control_camera(
     events: Res<Events<CameraControl>>,
     mut event_reader: Local<EventReader<CameraControl>>,
-    mut query: Query<(&Camera, &Transform, &mut Velocity)>,
+    mut query: Query<(&Camera, &Transform, &mut Velocity<Plugin>)>,
 ) {
     for event in event_reader.iter(&events) {
         for (_cam, _transform, mut v) in query.iter_mut() {
-            *v += event.change_velocity;
+            *v += event.add_velocity;
         }
     }
 }
 
-pub fn slow_down(time: Res<Time>, mut query: Query<(&Damping, &mut Velocity)>) {
+pub fn slow_down(time: Res<Time>, mut query: Query<(&Damping, &mut Velocity<Plugin>)>) {
     const UNNOTICEABLE_VELOCITY: f32 = 0.01;
 
     let dt = time.delta();
@@ -40,8 +43,15 @@ pub fn slow_down(time: Res<Time>, mut query: Query<(&Damping, &mut Velocity)>) {
         if *v >= UNNOTICEABLE_VELOCITY {
             assert!(damping >= 0.0); // don't want to accelerate
             *v *= 1.0 - damping * dt;
-        } else if *v != Velocity::default() {
-            *v = Velocity::default();
+        } else if *v != Velocity::<Plugin>::zero() {
+            *v = Velocity::zero();
         }
+    }
+}
+
+pub fn adjust_position(time: Res<Time>, mut query: Query<(&Velocity<Plugin>, &mut Transform)>) {
+    let dt = time.delta();
+    for (&v, mut pos) in query.iter_mut() {
+        pos.translation += v * dt;
     }
 }

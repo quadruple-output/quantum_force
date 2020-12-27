@@ -110,6 +110,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "angle"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ba2ba87287a952ce1802117f6201af6ff3f32dd372f42dbf53217e900bac7881"
+dependencies = [
+ "num-traits",
+ "serde",
+ "serde_derive",
+]
+
+[[package]]
 name = "ansi_term"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2730,7 +2741,9 @@ dependencies = [
 name = "quantum_force"
 version = "0.1.0"
 dependencies = [
+ "angle",
  "bevy",
+ "num-traits",
 ]
 
 [[package]]

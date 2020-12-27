@@ -73,3 +73,11 @@ impl<P: Plugin> PartialOrd<f32> for Velocity<P> {
         self.0.length().partial_cmp(other)
     }
 }
+
+impl<P: Plugin> Mul<Velocity<P>> for Quat {
+    type Output = Velocity<P>;
+
+    fn mul(self, rhs: Velocity<P>) -> Self::Output {
+        Velocity::from(self * rhs.0)
+    }
+}

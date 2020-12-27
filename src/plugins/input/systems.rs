@@ -1,9 +1,10 @@
+use crate::common::types::RadPerSecond;
 use crate::common::{components::CameraControl, resources::PausePhysics, types::PercentPerSecond};
-use angle::{Deg, Rad};
 use bevy::{
     input::mouse::{MouseMotion, MouseWheel},
     prelude::*,
 };
+use core::f32::consts::TAU;
 
 #[derive(Default)]
 pub struct EventReaders {
@@ -31,7 +32,7 @@ pub fn react_on_input(
     mut out_events: ResMut<Events<CameraControl>>,
 ) {
     const ESCAPE_VELOCITY_PER_WHEEL_UNIT: PercentPerSecond<f32> = PercentPerSecond(0.4);
-    const ANGLES_PER_MOUSE_PIXEL: Deg<f32> = Deg(0.1);
+    const RAD_PER_SECOND_PER_MOUSE_PIXEL: f32 = 0.1 * TAU / 360.0; // degrees->radians
 
     let control_state = ControlState {
         keyboard: &keyboard,
@@ -39,18 +40,26 @@ pub fn react_on_input(
     };
     let mut camera_control = CameraControl::default();
 
-    for motion in event_readers.mouse_motion.iter(&mouse_motion_events) {
-        if control_state.camera_movement_active() {
-            camera_control.yaw += Rad::from(ANGLES_PER_MOUSE_PIXEL * -motion.delta.x);
-            camera_control.pitch += Rad::from(ANGLES_PER_MOUSE_PIXEL * -motion.delta.y);
-        }
-    }
-    for scroll in event_readers.mouse_wheel.iter(&mouse_wheel_events) {
-        if control_state.camera_movement_active() {
-            camera_control.escape_velocity += ESCAPE_VELOCITY_PER_WHEEL_UNIT * scroll.y;
-        }
-    }
-    if camera_control != CameraControl::default() {
+    event_readers
+        .mouse_motion
+        .iter(&mouse_motion_events)
+        .for_each(|motion| {
+            if control_state.camera_movement_active() {
+                camera_control.yaw +=
+                    RadPerSecond(RAD_PER_SECOND_PER_MOUSE_PIXEL * -motion.delta.x);
+                camera_control.pitch +=
+                    RadPerSecond(RAD_PER_SECOND_PER_MOUSE_PIXEL * -motion.delta.y);
+            }
+        });
+    event_readers
+        .mouse_wheel
+        .iter(&mouse_wheel_events)
+        .for_each(|scroll| {
+            if control_state.camera_movement_active() {
+                camera_control.escape_velocity += ESCAPE_VELOCITY_PER_WHEEL_UNIT * scroll.y;
+            }
+        });
+    if !camera_control.is_initial() {
         out_events.send(camera_control);
     }
 }

@@ -1,7 +1,8 @@
 use super::components::{Camera, Damping};
 use crate::common::components::CameraControl;
-use angle::Rad;
+use crate::common::types::RadPerSecond;
 use bevy::prelude::*;
+use core::f32::consts::TAU;
 
 pub fn spawn_camera(commands: &mut Commands) {
     commands
@@ -15,7 +16,7 @@ pub fn spawn_camera(commands: &mut Commands) {
             ..Default::default()
         })
         .with(CameraControl {
-            yaw: Rad(2.5),
+            yaw: RadPerSecond(0.4 * TAU),
             ..Default::default()
         })
         .with(Damping::half_live(0.5));

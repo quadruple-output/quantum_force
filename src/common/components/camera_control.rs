@@ -1,16 +1,19 @@
 use std::ops::{AddAssign, MulAssign};
 
-use super::super::types::PercentPerSecond;
-use angle::Rad;
+use super::super::types::{PercentPerSecond, RadPerSecond};
 
 #[derive(Copy, Clone, Default, PartialEq)]
 pub struct CameraControl {
-    pub yaw: Rad<f32>,
-    pub pitch: Rad<f32>,
+    pub yaw: RadPerSecond<f32>,
+    pub pitch: RadPerSecond<f32>,
     pub escape_velocity: PercentPerSecond<f32>,
 }
 
 impl CameraControl {
+    pub fn is_initial(&self) -> bool {
+        *self == Self::default()
+    }
+
     fn pseudo_velocity(&self) -> f32 {
         self.yaw.0.abs() * self.yaw.0.abs()
             + self.pitch.0.abs() * self.pitch.0.abs()

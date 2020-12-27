@@ -3,13 +3,7 @@ use super::{
     resources::ParticleAssets,
     util,
 };
-use crate::{
-    common::components::Velocity,
-    plugins::physics::{
-        self,
-        components::{Acceleration, Force, Mass},
-    },
-};
+use crate::plugins::physics::components::{Acceleration, Force, Mass, Velocity};
 use bevy::prelude::*;
 
 pub struct Particle;
@@ -60,7 +54,7 @@ impl ParticleBuilder {
             })
             .with(Force::default())
             .with(Acceleration::default())
-            .with(Velocity::<physics::Plugin>::from(self.velocity));
+            .with(Velocity::from(self.velocity));
         let mut quant_scale = 1.0;
         if let Some(mass) = self.mass {
             commands.with(Mass(mass));

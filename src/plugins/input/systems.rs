@@ -44,18 +44,23 @@ pub fn react_on_input(
         .mouse_motion
         .iter(&mouse_motion_events)
         .for_each(|motion| {
-            if control_state.camera_movement_active() {
+            if control_state.camera_movement_yaw_pitch() {
                 camera_control.yaw +=
                     RadPerSecond(RAD_PER_SECOND_PER_MOUSE_PIXEL * -motion.delta.x);
                 camera_control.pitch +=
                     RadPerSecond(RAD_PER_SECOND_PER_MOUSE_PIXEL * -motion.delta.y);
-            }
+            } else if control_state.camera_movement_roll_pitch() {
+                camera_control.roll +=
+                    RadPerSecond(RAD_PER_SECOND_PER_MOUSE_PIXEL * motion.delta.x);
+                camera_control.pitch +=
+                    RadPerSecond(RAD_PER_SECOND_PER_MOUSE_PIXEL * -motion.delta.y);
+            };
         });
     event_readers
         .mouse_wheel
         .iter(&mouse_wheel_events)
         .for_each(|scroll| {
-            if control_state.camera_movement_active() {
+            if control_state.camera_movement_yaw_pitch() {
                 camera_control.escape_velocity += ESCAPE_VELOCITY_PER_WHEEL_UNIT * scroll.y;
             }
         });
@@ -70,7 +75,11 @@ struct ControlState<'a> {
 }
 
 impl<'a> ControlState<'a> {
-    fn camera_movement_active(&self) -> bool {
+    fn camera_movement_yaw_pitch(&self) -> bool {
         self.keyboard.pressed(KeyCode::LControl) || self.mouse_buttons.pressed(MouseButton::Right)
+    }
+
+    fn camera_movement_roll_pitch(&self) -> bool {
+        self.keyboard.pressed(KeyCode::LAlt) || self.mouse_buttons.pressed(MouseButton::Left)
     }
 }

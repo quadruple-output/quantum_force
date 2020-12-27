@@ -53,7 +53,7 @@ pub fn apply_control(time: Res<Time>, mut query: Query<(&CameraControl, &mut Tra
 
     let dt = time.delta_seconds();
     for (&cc, mut transform) in query.iter_mut() {
-        let ypr = Quat::from_rotation_ypr(cc.yaw.0 * dt, cc.pitch.0 * dt, 0.0);
+        let ypr = Quat::from_rotation_ypr(cc.yaw.0 * dt, cc.pitch.0 * dt, cc.roll.0 * dt);
         let new_rotation = (transform.rotation * ypr).normalize();
         let v_target_to_cam = transform.translation - look_at_target;
         let mut new_v_target_to_cam =

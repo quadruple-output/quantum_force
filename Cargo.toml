@@ -7,10 +7,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-angle = "0.4.0"
-num-traits = "0.2.14"
+angle = "0.4.*"
+num-traits = "0.2.*"
+ncollide3d = "0.26.*"
 
 [dependencies.bevy]
-version = "0.4.0"
+version = "0.4.*"
 features = ["dynamic"]
 

@@ -14,16 +14,62 @@ fn add_default_entities(
 ) {
     use self::plugins::particle::{Particle, Spin};
 
-    commands
-        .spawn(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Plane { size: 10.0 })),
-            material: materials.add(Color::rgb(0.0, 0.5, 0.5).into()),
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Mesh::from(shape::Plane { size: 10.0 })),
+        material: materials.add(Color::rgb(0.0, 0.5, 0.5).into()),
+        ..Default::default()
+    });
+
+    // Light Source ----------------------------------------
+    commands.spawn(LightBundle {
+        transform: Transform::from_translation(Vec3::new(4.0, 8.0, 4.0)),
+        ..Default::default()
+    });
+
+    let wall_color = materials.add(Color::GOLD.into());
+
+    /*
+    commands.spawn(PbrBundle {
+        transform: Transform {
+            translation: Vec3::unit_z() * 5.0,
+            //rotation: Quat::from_axis_angle(-Vec3::unit_z(), Default::default()),
             ..Default::default()
-        })
-        .spawn(LightBundle {
-            transform: Transform::from_translation(Vec3::new(4.0, 8.0, 4.0)),
-            ..Default::default()
-        });
+        },
+        mesh: meshes.add(Mesh::from(shape::Box {
+            min_x: -5.,
+            max_x: 5.,
+            min_y: -5.,
+            max_y: 5.,
+            min_z: -0.25,
+            max_z: 0.25,
+        })),
+        material: wall_color,
+        ..Default::default()
+    });
+    */
+
+    // Walls ----------------------------------------
+    let wall = shapes::build_wall()
+        .with_dimensions(10.0, 10.0, 0.5, &mut meshes)
+        .with_material(wall_color);
+    //.with_material(materials.add(Color::GOLD.into()));
+    wall.clone()
+        .center_at(Vec3::unit_x() * 5.0)
+        .facing(-Vec3::unit_x(), Vec3::unit_y())
+        .spawn(commands);
+    wall.clone()
+        .center_at(Vec3::unit_x() * -5.0)
+        .facing(Vec3::unit_x(), Vec3::unit_y())
+        .spawn(commands);
+    wall.clone()
+        .center_at(Vec3::unit_z() * -5.0)
+        .facing(Vec3::unit_z(), Vec3::unit_y())
+        .spawn(commands);
+    wall.center_at(Vec3::unit_z() * 5.0)
+        .facing(-Vec3::unit_z(), Vec3::unit_y())
+        .spawn(commands);
+
+    // Particles ----------------------------------------
     Particle::builder()
         .with_mass(2.0)
         .with_spin(Spin::Up)
@@ -51,6 +97,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(common::Plugin)
         .add_plugin(physics::Plugin)
+        .add_plugin(shapes::Plugin)
         .add_plugin(particle::Plugin)
         .add_plugin(input::Plugin)
         .add_plugin(camera::Plugin)

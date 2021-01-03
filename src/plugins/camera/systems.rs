@@ -8,15 +8,12 @@ pub fn spawn_camera(commands: &mut Commands) {
     commands
         .spawn((Camera,))
         .with_bundle(Camera3dBundle {
-            transform:
-                //Transform::from_translation(Vec3::new(-3.0, 5.0, 8.0))
-                //.looking_at(Vec3::default(), Vec3::unit_y()),
-                Transform::from_translation(Vec3::new(0.0, 4.0, 8.0))
-                .looking_at(Vec3::new(0.0,1.2,0.0), Vec3::unit_y()),
+            transform: Transform::from_translation(Vec3::new(1.0, 1.0, 5.0))
+                .looking_at(Vec3::new(0.0, 1.2, 0.0), Vec3::unit_y()),
             ..Default::default()
         })
         .with(CameraControl {
-            yaw: RadPerSecond(0.4 * TAU),
+            pitch: RadPerSecond(0.4 * TAU),
             ..Default::default()
         })
         .with(Damping::half_live(0.5));
@@ -53,7 +50,7 @@ pub fn apply_control(time: Res<Time>, mut query: Query<(&CameraControl, &mut Tra
 
     let dt = time.delta_seconds();
     for (&cc, mut transform) in query.iter_mut() {
-        let ypr = Quat::from_rotation_ypr(cc.yaw.0 * dt, cc.pitch.0 * dt, cc.roll.0 * dt);
+        let ypr = Quat::from_rotation_ypr(cc.yaw.0 * dt, -cc.pitch.0 * dt, cc.roll.0 * dt);
         let new_rotation = (transform.rotation * ypr).normalize();
         let v_target_to_cam = transform.translation - look_at_target;
         let mut new_v_target_to_cam =

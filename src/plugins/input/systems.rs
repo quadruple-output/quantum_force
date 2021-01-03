@@ -48,12 +48,12 @@ pub fn react_on_input(
                 camera_control.yaw +=
                     RadPerSecond(RAD_PER_SECOND_PER_MOUSE_PIXEL * -motion.delta.x);
                 camera_control.pitch +=
-                    RadPerSecond(RAD_PER_SECOND_PER_MOUSE_PIXEL * -motion.delta.y);
+                    RadPerSecond(RAD_PER_SECOND_PER_MOUSE_PIXEL * motion.delta.y);
             } else if control_state.camera_movement_roll_pitch() {
                 camera_control.roll +=
                     RadPerSecond(RAD_PER_SECOND_PER_MOUSE_PIXEL * motion.delta.x);
                 camera_control.pitch +=
-                    RadPerSecond(RAD_PER_SECOND_PER_MOUSE_PIXEL * -motion.delta.y);
+                    RadPerSecond(RAD_PER_SECOND_PER_MOUSE_PIXEL * motion.delta.y);
             };
         });
     event_readers

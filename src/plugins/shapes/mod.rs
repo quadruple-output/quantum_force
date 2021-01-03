@@ -1,6 +1,7 @@
 mod components;
 mod entities;
 mod resources;
+mod tools;
 
 pub use entities::build_wall;
 

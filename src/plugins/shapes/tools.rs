@@ -1,10 +1,17 @@
-use bevy::render::{
-    mesh::{Indices, Mesh},
-    pipeline::PrimitiveTopology,
+use bevy::{
+    prelude::*,
+    render::{
+        mesh::{Indices, Mesh},
+        pipeline::PrimitiveTopology,
+    },
 };
-use ncollide3d::procedural::{IndexBuffer, TriMesh};
+use ncollide3d::{
+    math::{Isometry, Point, Translation},
+    na::{Quaternion, UnitQuaternion, Vector4},
+    procedural::{IndexBuffer, TriMesh},
+};
 
-pub fn convert_ncollide_mesh(mut ncollide_mesh: TriMesh<f32>) -> Mesh {
+pub fn mesh_from_tri_mesh(mut ncollide_mesh: TriMesh<f32>) -> Mesh {
     ncollide_mesh.unify_index_buffer();
 
     let bevy_positions = ncollide_mesh
@@ -42,4 +49,23 @@ pub fn convert_ncollide_mesh(mut ncollide_mesh: TriMesh<f32>) -> Mesh {
     bevy_mesh.set_indices(Some(bevy_indices));
 
     bevy_mesh
+}
+
+pub fn vec3_to_point(v: Vec3) -> Point<f32> {
+    Point::new(v.x, v.y, v.z)
+}
+
+pub fn vec3_from_point(p: Point<f32>) -> Vec3 {
+    Vec3::new(p.x, p.y, p.z)
+}
+
+pub fn transform_to_isometry(transform: &Transform) -> Isometry<f32> {
+    let quat = transform.rotation;
+    let vec = transform.translation;
+    Isometry::from_parts(
+        Translation::new(vec.x, vec.y, vec.z),
+        UnitQuaternion::new_unchecked(Quaternion {
+            coords: Vector4::new(quat.x, quat.y, quat.z, quat.w),
+        }),
+    )
 }

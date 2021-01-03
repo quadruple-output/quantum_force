@@ -1,8 +1,9 @@
 mod components;
 mod entities;
 mod resources;
-mod tools;
+pub mod tools;
 
+pub use components::NcollideShape;
 pub use entities::build_wall;
 
 use resources::NcollideContext;

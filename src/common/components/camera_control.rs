@@ -1,6 +1,5 @@
-use std::ops::{AddAssign, MulAssign};
-
 use super::super::types::{PercentPerSecond, RadPerSecond};
+use std::ops::{AddAssign, MulAssign};
 
 #[derive(Copy, Clone, Default, PartialEq)]
 pub struct CameraControl {

@@ -64,7 +64,7 @@ fn add_default_entities(
     Particle::builder()
         .with_mass(2.0)
         .with_spin(Spin::Up)
-        .with_velocity(Vec3::new(0.0, 0.0, 0.0))
+        .with_velocity(Vec3::new(0.0, 0.0, -1.0))
         .spawn_at(Vec3::new(1.5, 1.0, 0.0), commands, &particle_assets);
     Particle::builder()
         .with_mass(2.0)

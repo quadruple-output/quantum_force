@@ -1,7 +1,7 @@
 pub mod components;
 mod systems;
 
-use self::systems::{acceleration, force, gravity, velocity, RunCriteria};
+use self::systems::{acceleration, force, gravity, repulsion, velocity, RunCriteria};
 use bevy::{core::FixedTimestep, prelude::*};
 
 const PHYSICS_TIMESTEP: &str = "PHYSICS_TIMESTEP";
@@ -16,10 +16,11 @@ impl bevy::prelude::Plugin for Plugin {
             "fixed_step_physics",
             SystemStage::parallel()
                 .with_run_criteria(RunCriteria::from(
-                    FixedTimestep::steps_per_second(200.0).with_label(PHYSICS_TIMESTEP),
+                    FixedTimestep::steps_per_second(1000.0).with_label(PHYSICS_TIMESTEP),
                 ))
                 .with_system(force::reset.system())
                 .with_system(gravity::calculate_forces.system())
+                .with_system(repulsion::calculate_forces.system())
                 .with_system(force::accelerate_masses.system())
                 .with_system(acceleration::adjust_velocity.system())
                 .with_system(velocity::adjust_position.system()),

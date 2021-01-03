@@ -1,5 +1,5 @@
-use super::super::components::NcollideShape;
-use crate::{common::types::builder_option::*, plugins::shapes::tools::convert_ncollide_mesh};
+use super::super::{components::NcollideShape, tools::mesh_from_tri_mesh};
+use crate::{common::types::builder_option::*, plugins::physics::components::Repulsor};
 use bevy::prelude::*;
 use ncollide3d::{math::Vector, shape::Cuboid, transformation::ToTriMesh};
 use std::marker::PhantomData;
@@ -43,7 +43,7 @@ where
         let ncollide_shape = Cuboid::new(Vector::new(0.5 * x, 0.5 * y, 0.5 * z));
         WallBuilder {
             ncollide_shape: Some(ncollide_shape),
-            mesh: Some((*meshes).add(convert_ncollide_mesh(ncollide_shape.to_trimesh(())))),
+            mesh: Some((*meshes).add(mesh_from_tri_mesh(ncollide_shape.to_trimesh(())))),
             dimensions_defined: PhantomData::<Defined>,
             center: self.center,
             facing: self.facing,
@@ -107,6 +107,7 @@ where
                 material: self.material.unwrap(),
                 ..Default::default()
             })
-            .with(NcollideShape(Box::new(self.ncollide_shape.unwrap())));
+            .with(NcollideShape(Box::new(self.ncollide_shape.unwrap())))
+            .with(dbg!(Repulsor { range: 0.7 }));
     }
 }

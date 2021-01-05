@@ -4,7 +4,7 @@ use std::ops::{AddAssign, Mul, MulAssign, SubAssign};
 use bevy::prelude::*;
 
 #[derive(Debug, Copy)]
-pub struct Velocity(Vec3);
+pub struct Velocity(pub Vec3);
 
 impl Velocity {
     pub fn zero() -> Self {

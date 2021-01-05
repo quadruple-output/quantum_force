@@ -1,21 +1,22 @@
 use std::{any::TypeId, borrow::Cow};
 
 use bevy::{
-    core::FixedTimestep,
     ecs::{ShouldRun, SystemId, ThreadLocalExecution, TypeAccess},
     prelude::*,
 };
 
 use crate::common::resources::PausePhysics;
 
+pub type TimeStep = dyn System<In = (), Out = ShouldRun>;
+
 pub struct RunCriteria {
-    time_step: FixedTimestep,
+    time_step: Box<TimeStep>,
     system_id: SystemId,
     resource_access: TypeAccess<TypeId>,
 }
 
 impl RunCriteria {
-    pub fn from(time_step: FixedTimestep) -> Self {
+    pub fn from(time_step: Box<TimeStep>) -> Self {
         Self {
             time_step,
             system_id: SystemId::new(),

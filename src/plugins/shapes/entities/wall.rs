@@ -108,6 +108,6 @@ where
                 ..Default::default()
             })
             .with(NcollideShape(Box::new(self.ncollide_shape.unwrap())))
-            .with(dbg!(Repulsor { range: 0.7 }));
+            .with(dbg!(Repulsor { range: 0.1 }));
     }
 }
